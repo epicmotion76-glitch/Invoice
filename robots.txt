@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://invoice-epicmotion76-8861.vercel.app/sitemap.xml
