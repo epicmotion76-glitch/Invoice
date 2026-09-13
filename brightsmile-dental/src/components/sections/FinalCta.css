@@ -1,0 +1,89 @@
+.final-cta {
+  padding-block: var(--section-y);
+  background: #fff;
+}
+
+.final-cta__card {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(56px, 8vw, 96px) clamp(24px, 5vw, 64px);
+  border-radius: 36px;
+  background: var(--c-navy-900);
+  text-align: center;
+  color: rgba(255, 255, 255, 0.78);
+  isolation: isolate;
+}
+
+.final-cta__card::before,
+.final-cta__card::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.final-cta__card::before {
+  top: -240px;
+  left: -160px;
+  width: 560px;
+  height: 560px;
+  background: radial-gradient(closest-side, rgba(47, 143, 137, 0.45), rgba(47, 143, 137, 0));
+}
+
+.final-cta__card::after {
+  right: -140px;
+  bottom: -260px;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(closest-side, rgba(224, 141, 91, 0.22), rgba(224, 141, 91, 0));
+}
+
+.final-cta__title {
+  max-width: 780px;
+  margin-inline: auto;
+  font-size: clamp(2.125rem, 1.3rem + 3.2vw, 3.75rem);
+  line-height: 1.06;
+  color: #fff;
+}
+
+.final-cta__text {
+  max-width: 520px;
+  margin: 20px auto 0;
+  font-size: 1.125rem;
+}
+
+.final-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px 28px;
+  margin-top: 36px;
+}
+
+.final-cta__phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 650;
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.2s ease;
+}
+
+.final-cta__phone:hover {
+  text-decoration-color: #fff;
+}
+
+.final-cta__phone svg {
+  width: 17px;
+  height: 17px;
+  color: var(--c-teal-300);
+}
+
+.final-cta :focus-visible {
+  outline-color: var(--c-teal-300);
+}

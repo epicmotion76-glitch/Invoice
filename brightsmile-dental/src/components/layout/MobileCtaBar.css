@@ -1,0 +1,37 @@
+.mobile-cta {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-cta {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    padding: 12px var(--gutter) calc(12px + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.94);
+    border-top: 1px solid rgba(12, 36, 54, 0.08);
+    box-shadow: 0 -10px 30px -16px rgba(12, 36, 54, 0.25);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    transform: translateY(110%);
+    transition: transform 0.35s var(--ease-out);
+  }
+
+  .mobile-cta.is-visible {
+    transform: none;
+  }
+
+  .menu-open .mobile-cta {
+    transform: translateY(110%);
+  }
+
+  .mobile-cta__call {
+    --btn-bg: #fff;
+    padding-inline: 20px;
+  }
+}
