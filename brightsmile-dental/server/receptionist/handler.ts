@@ -10,7 +10,7 @@
  * The reply streams back as newline-delimited JSON `ServerEvent`s.
  */
 import { sanitizeDraft, missingAppointmentFields } from "../../src/lib/receptionist/appointment.js";
-import { CHAT_LIMITS, type ChatErrorCode, type ServerEvent } from "../../src/lib/receptionist/protocol.js";
+import { CHAT_LIMITS, type ChatErrorCode, type Locale, type ServerEvent } from "../../src/lib/receptionist/protocol.js";
 import { createAnthropicModel, parseEffort } from "./anthropic.js";
 import { clinicISODate, clinicToday, describeClinicNow, isClinicOpen } from "./clinicTime.js";
 import { createGeminiModel } from "./gemini.js";
@@ -201,13 +201,23 @@ async function respond(
     return;
   }
 
+  let requestPrepared = false;
   const context: ToolContext = {
     appointment,
     locale,
     today,
     openNow,
     knowledge: deps.knowledge ?? staticKnowledgeSource,
-    emit,
+    emit: (event) => {
+      if (event.type === "appointment_ready") requestPrepared = true;
+      emit(event);
+    },
+  };
+
+  // If the WhatsApp request was already prepared, a failed follow-up must not read as an error.
+  const finishWithoutModelText = (code: ChatErrorCode) => {
+    if (requestPrepared) emit({ type: "text", delta: requestReadyReply(locale) });
+    else emit({ type: "error", code });
   };
 
   let wroteText = false;
@@ -233,11 +243,18 @@ async function respond(
       },
       signal,
     });
-    if (!wroteText) emit({ type: "error", code: "unavailable" });
+    if (!wroteText) finishWithoutModelText("unavailable");
   } catch (error) {
     const code = error instanceof ModelError ? error.code : "unavailable";
     // Log the failure class only; never visitor messages or appointment details.
     console.error(`[receptionist] reply failed: ${code}${error instanceof Error ? ` (${error.message})` : ""}`);
-    emit({ type: "error", code });
+    if (wroteText && requestPrepared) return; // The visitor already has the text and the WhatsApp button.
+    finishWithoutModelText(code);
   }
+}
+
+function requestReadyReply(locale: Locale) {
+  return locale === "pt"
+    ? "O seu pedido de consulta está pronto para enviar à receção. Carregue no botão do WhatsApp abaixo e depois em Enviar. A consulta só fica confirmada quando a equipa responder."
+    : "Your appointment request is ready to send to reception. Press the WhatsApp button below, then Send in WhatsApp. Your appointment isn't confirmed until the team replies.";
 }

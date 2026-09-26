@@ -259,6 +259,22 @@ describe("chat handler: failures", () => {
     errors.mockRestore();
   });
 
+  it("still tells the visitor their request is ready if the model fails after preparing it", async () => {
+    const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { model } = scriptedModel(async ({ runTool }) => {
+      await runTool("prepare_whatsapp_appointment", { visitor_confirmed: true });
+      throw new ModelError("busy");
+    });
+    const { events, reply } = await run([user("Yes, that's right")], { model }, {
+      appointment: { name: "Sarah", contact: "+351 912 345 678", service: "invisalign", preferredDate: "2026-10-02", preferredTime: "afternoon" },
+    });
+    expect(events.some((event) => event.type === "appointment_ready")).toBe(true);
+    expect(events.some((event) => event.type === "error")).toBe(false);
+    expect(reply).toMatch(/ready to send to reception/);
+    expect(reply).toMatch(/isn't confirmed/);
+    errors.mockRestore();
+  });
+
   it("reports an error when the model produces no text", async () => {
     const { model } = scriptedModel(() => undefined);
     const { events } = await run([user("Hello")], { model });

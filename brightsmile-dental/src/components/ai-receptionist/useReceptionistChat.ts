@@ -149,13 +149,18 @@ export function useReceptionistChat() {
 
       if (failure) {
         trackReceptionistEvent("ai_error_shown", { code: failure });
+        // Keep cards the reply already produced (a prepared WhatsApp request must not be lost).
         updateMessage(replyId, (message) => ({
           ...message,
           text: "",
           pending: false,
           local: true,
           localKey: failure === "rate_limited" ? "rateLimited" : "fallback",
-          cards: [{ kind: "contact" }, ...(failure === "invalid_request" ? [] : [{ kind: "retry" } as const])],
+          cards: [
+            ...message.cards.filter((card) => card.kind !== "contact" && card.kind !== "retry"),
+            { kind: "contact" },
+            ...(failure === "invalid_request" ? [] : [{ kind: "retry" } as const]),
+          ],
         }));
       } else {
         updateMessage(replyId, (message) => ({ ...message, pending: false }));
