@@ -53,6 +53,9 @@ async function run(
   return { response, events, reply, raw: text };
 }
 
+const lastAppointmentEvent = (events: ServerEvent[]) =>
+  [...events].reverse().find((event) => event.type === "appointment");
+
 const user = (content: string): ChatTurn => ({ role: "user", content });
 const assistant = (content: string): ChatTurn => ({ role: "assistant", content });
 
@@ -143,7 +146,7 @@ describe("chat handler: conversations", () => {
       onText("Thanks Sarah. Do you have a preferred day?");
     });
     const first = await run([user("I'm Sarah and I want Invisalign")], { model: turn1.model });
-    const afterTurn1 = first.events.findLast((event) => event.type === "appointment");
+    const afterTurn1 = lastAppointmentEvent(first.events);
     expect(afterTurn1).toMatchObject({ appointment: { name: "Sarah", service: "invisalign" }, complete: false });
 
     // Turn 2: the browser sends the saved draft back; the model adds the rest.
@@ -166,7 +169,7 @@ describe("chat handler: conversations", () => {
       { model: turn2.model },
       { appointment: saved },
     );
-    const complete = second.events.findLast((event) => event.type === "appointment");
+    const complete = lastAppointmentEvent(second.events);
     expect(complete).toMatchObject({ complete: true, missing: [] });
     expect(second.events.some((event) => event.type === "appointment_ready")).toBe(false);
 

@@ -163,7 +163,7 @@ async function respond(
   const openNow = isClinicOpen(now);
 
   const latest = messages[messages.length - 1].content;
-  const previousAssistant = messages.findLast((turn) => turn.role === "assistant")?.content;
+  const previousAssistant = [...messages].reverse().find((turn) => turn.role === "assistant")?.content;
   const locale = detectLocale(latest, previousLocale);
   emit({ type: "locale", locale });
 
