@@ -4,7 +4,8 @@
  */
 import { ModelError, type ReceptionistModel, type ReceptionistReplyRequest } from "./model.js";
 
-export const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
+/** Google's maintained alias for the current Flash model. Pin a specific version with AI_MODEL. */
+export const DEFAULT_GEMINI_MODEL = "gemini-flash-latest";
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta";
 
 type Effort = "low" | "medium" | "high" | "xhigh" | "max";
@@ -87,9 +88,17 @@ async function* readSse(body: ReadableStream<Uint8Array>): AsyncGenerator<Stream
   }
 }
 
-function errorForStatus(status: number): ModelError {
-  if (status === 429 || status >= 500) return new ModelError("busy", `provider error ${status}`);
-  return new ModelError("unavailable", `provider error ${status}`);
+/** Includes Google's error message (e.g. "model not found"); it never contains visitor messages. */
+async function errorForResponse(response: Response): Promise<ModelError> {
+  let detail = "";
+  try {
+    const body = (await response.json()) as { error?: { message?: string } };
+    detail = body.error?.message ? `: ${body.error.message.slice(0, 200)}` : "";
+  } catch {
+    // No JSON body.
+  }
+  const message = `provider error ${response.status}${detail}`;
+  return new ModelError(response.status === 429 || response.status >= 500 ? "busy" : "unavailable", message);
 }
 
 const wait = (ms: number, signal: AbortSignal) =>
@@ -127,9 +136,9 @@ export function createGeminiModel(options: GeminiModelOptions): ReceptionistMode
         throw new ModelError(signal.aborted ? "timeout" : "unavailable", "network error");
       }
       if (response.ok && response.body) return response.body;
-      await response.body?.cancel().catch(() => undefined);
       const retryable = response.status === 429 || response.status === 500 || response.status === 503;
-      if (!retryable || attempt >= 1) throw errorForStatus(response.status);
+      if (!retryable || attempt >= 1) throw await errorForResponse(response);
+      await response.body?.cancel().catch(() => undefined);
       await wait(800, signal);
     }
   }

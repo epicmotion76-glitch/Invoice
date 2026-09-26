@@ -70,7 +70,7 @@ describe("createGeminiModel", () => {
     ]);
     const { request, text, toolCalls } = replyRequest();
 
-    await createGeminiModel({ apiKey: "test-key", fetch }).reply(request);
+    await createGeminiModel({ apiKey: "test-key", model: "gemini-2.5-flash", fetch }).reply(request);
 
     expect(text.join("")).toBe("Let me check.\n\nWe're open Saturday 9–1.");
     expect(toolCalls).toEqual([{ name: "get_clinic_information", input: { topic: "opening_hours" } }]);
@@ -95,6 +95,18 @@ describe("createGeminiModel", () => {
       role: "user",
       parts: [{ functionResponse: { name: "get_clinic_information", response: { facts: ["Saturday: 9:00 AM – 1:00 PM."] } } }],
     });
+  });
+
+  it("defaults to the gemini-flash-latest alias and reports Google's error message", async () => {
+    const notFound = () =>
+      new Response(JSON.stringify({ error: { code: 404, message: "models/x is not found for API version v1beta" } }), { status: 404 });
+    const { fetch, requests } = fakeFetch([notFound]);
+    const failure = await createGeminiModel({ apiKey: "k", fetch })
+      .reply(replyRequest().request)
+      .catch((reason: unknown) => reason);
+    expect(requests[0].url).toContain("/models/gemini-flash-latest:streamGenerateContent");
+    expect(requests[0].body.generationConfig.thinkingConfig).toBeUndefined();
+    expect((failure as ModelError).message).toBe("provider error 404: models/x is not found for API version v1beta");
   });
 
   it("uses a thinking level for Gemini 3 models and hides thought parts", async () => {
