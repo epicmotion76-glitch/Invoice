@@ -1,4 +1,5 @@
 import { LazyMotion, MotionConfig } from "motion/react";
+import { AiReceptionist } from "./components/ai-receptionist/AiReceptionist";
 import { AppointmentProvider } from "./components/appointment/AppointmentContext";
 import { Appointment } from "./components/appointment/Appointment";
 import { BookingDialog } from "./components/booking/BookingDialog";
@@ -37,6 +38,7 @@ export default function App() {
           <Footer />
           <MobileCtaBar />
           <BookingDialog />
+          <AiReceptionist />
         </AppointmentProvider>
       </MotionConfig>
     </LazyMotion>

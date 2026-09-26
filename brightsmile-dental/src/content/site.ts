@@ -12,40 +12,11 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import type { ServiceIconName } from "../components/icons/ServiceIcon";
 import { images, type BeforeAfterImages } from "./images";
 
-export const clinic = {
-  name: "BrightSmile Dental Clinic",
-  shortName: "BrightSmile",
-  tagline: "Confident smiles begin with exceptional care.",
-  city: "Viseu",
-  phone: { display: "+351 920 008 205", href: "tel:+351920008205" },
-  whatsapp: {
-    // International format, digits only (no +, spaces or leading zeros).
-    number: "351920008205",
-    bookingMessage: "Hello BrightSmile Dental Clinic! I'd like to book a visit.",
-  },
-  email: "ankitdawadi82@gmail.com",
-  // Sample street address: replace with the clinic's real address.
-  address: {
-    line1: "Rua Formosa 112",
-    line2: "3500-135 Viseu, Portugal",
-    mapUrl: "https://www.google.com/maps/search/?api=1&query=Viseu%2C%20Portugal",
-  },
-  hours: [
-    { days: "Monday – Friday", time: "8:00 AM – 6:00 PM" },
-    { days: "Saturday", time: "9:00 AM – 1:00 PM" },
-    { days: "Sunday", time: "Closed" },
-  ],
-  rating: { score: "4.9", reviewCount: "300+" },
-  // Placeholder profile links.
-  social: [
-    { network: "instagram", label: "Instagram", href: "#" },
-    { network: "facebook", label: "Facebook", href: "#" },
-    { network: "linkedin", label: "LinkedIn", href: "#" },
-  ],
-} as const;
+// Clinic facts, treatments and services live in clinic.ts (shared with the AI receptionist).
+export { clinic, services, treatmentOptions } from "./clinic";
+export type { Service, TreatmentValue } from "./clinic";
 
 export type NavLink = { id: string; label: string };
 
@@ -57,19 +28,6 @@ export const navLinks: NavLink[] = [
   { id: "reviews", label: "Reviews" },
   { id: "contact", label: "Contact" },
 ];
-
-export const treatmentOptions = [
-  { value: "checkup", label: "Checkup & hygiene clean" },
-  { value: "general", label: "General dentistry" },
-  { value: "cosmetic", label: "Cosmetic dentistry" },
-  { value: "whitening", label: "Teeth whitening" },
-  { value: "implants", label: "Dental implants" },
-  { value: "invisalign", label: "Invisalign® clear aligners" },
-  { value: "emergency", label: "Emergency dental care" },
-  { value: "unsure", label: "Not sure yet, I'd like advice" },
-] as const;
-
-export type TreatmentValue = (typeof treatmentOptions)[number]["value"];
 
 export type Benefit = { icon: LucideIcon; title: string; text: string };
 
@@ -93,52 +51,6 @@ export const benefits: Benefit[] = [
     icon: HeartHandshake,
     title: "Friendly, anxiety-aware care",
     text: "We go at your pace, with breaks whenever you need.",
-  },
-];
-
-export type Service = {
-  icon: ServiceIconName;
-  title: string;
-  text: string;
-  treatment: TreatmentValue;
-};
-
-export const services: Service[] = [
-  {
-    icon: "general",
-    title: "General Dentistry",
-    text: "Thorough checkups, hygiene cleans and tooth-coloured fillings that keep your whole mouth healthy for the long run.",
-    treatment: "general",
-  },
-  {
-    icon: "cosmetic",
-    title: "Cosmetic Dentistry",
-    text: "Veneers, bonding and contouring planned around your features, for results that look naturally like you.",
-    treatment: "cosmetic",
-  },
-  {
-    icon: "whitening",
-    title: "Teeth Whitening",
-    text: "Professional in-clinic and take-home whitening that lifts stains safely, even for sensitive teeth.",
-    treatment: "whitening",
-  },
-  {
-    icon: "implants",
-    title: "Dental Implants",
-    text: "Permanent, natural-looking replacements for missing teeth that feel and function like your own.",
-    treatment: "implants",
-  },
-  {
-    icon: "aligners",
-    title: "Invisalign® Clear Aligners",
-    text: "Straighten your smile discreetly with removable, near-invisible aligners and digital progress check-ins.",
-    treatment: "invisalign",
-  },
-  {
-    icon: "emergency",
-    title: "Emergency Dentistry",
-    text: "Toothache, a chipped tooth or swelling? We keep same-day slots aside for urgent care.",
-    treatment: "emergency",
   },
 ];
 

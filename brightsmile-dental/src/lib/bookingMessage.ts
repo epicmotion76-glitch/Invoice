@@ -1,10 +1,18 @@
-import { parseISODate } from "../components/appointment/validation";
+// Also imported by the AI receptionist's serverless function (Node ESM), hence the ".js" specifier.
+import { parseISODate } from "../components/appointment/validation.js";
 
-const dateFormat = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+const dateFormats = new Map<string, Intl.DateTimeFormat>();
 
-export function formatBookingDate(iso: string) {
+/** "Tuesday, 15 September 2026" (or "terça-feira, 15 de setembro de 2026" for `pt-PT`). */
+export function formatBookingDate(iso: string, locale = "en-GB") {
   const date = parseISODate(iso);
-  return date ? dateFormat.format(date) : iso;
+  if (!date) return iso;
+  let format = dateFormats.get(locale);
+  if (!format) {
+    format = new Intl.DateTimeFormat(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    dateFormats.set(locale, format);
+  }
+  return format.format(date);
 }
 
 type BookingDetails = {
