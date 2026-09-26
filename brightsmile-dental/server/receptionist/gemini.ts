@@ -50,8 +50,9 @@ function toGeminiSchema(schema: unknown): unknown {
 }
 
 function thinkingConfig(model: string, effort: Effort) {
-  // Gemini 3+ takes a thinking level; 2.5 Flash models can switch thinking off for faster chat replies.
-  const version = Number(/gemini-(\d+(?:\.\d+)?)/.exec(model)?.[1] ?? 0);
+  // Gemini 3+ (and the "-latest" aliases, which track it) take a thinking level; 2.5 Flash models
+  // can switch thinking off. Thinking counts against maxOutputTokens, so keep it low for chat.
+  const version = /-latest$/.test(model) ? 3 : Number(/gemini-(\d+(?:\.\d+)?)/.exec(model)?.[1] ?? 0);
   if (version >= 3) return { thinkingLevel: effort === "low" ? "low" : "high" };
   if (/gemini-2\.5-flash/.test(model) && effort === "low") return { thinkingBudget: 0 };
   return undefined;
@@ -160,7 +161,7 @@ export function createGeminiModel(options: GeminiModelOptions): ReceptionistMode
             })),
           },
         ],
-        generationConfig: { maxOutputTokens: 4096, thinkingConfig: thinkingConfig(model, effort) },
+        generationConfig: { maxOutputTokens: 8192, thinkingConfig: thinkingConfig(model, effort) },
       };
 
       let wroteText = false;
@@ -192,6 +193,7 @@ export function createGeminiModel(options: GeminiModelOptions): ReceptionistMode
 
           if (finishReason && BLOCKED_FINISH_REASONS.has(finishReason)) throw new ModelError("refused", `finish: ${finishReason}`);
 
+          if (finishReason === "MAX_TOKENS") console.warn(`[receptionist] ${model} reply hit the output token limit`);
           const calls = modelParts.flatMap((part) => (part.functionCall ? [part.functionCall] : []));
           // A call cut off by the token limit may be truncated, so only run calls from complete turns.
           if (calls.length === 0 || finishReason === "MAX_TOKENS") return;

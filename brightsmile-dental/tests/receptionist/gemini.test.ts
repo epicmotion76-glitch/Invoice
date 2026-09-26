@@ -105,7 +105,7 @@ describe("createGeminiModel", () => {
       .reply(replyRequest().request)
       .catch((reason: unknown) => reason);
     expect(requests[0].url).toContain("/models/gemini-flash-latest:streamGenerateContent");
-    expect(requests[0].body.generationConfig.thinkingConfig).toBeUndefined();
+    expect(requests[0].body.generationConfig.thinkingConfig).toEqual({ thinkingLevel: "low" });
     expect((failure as ModelError).message).toBe("provider error 404: models/x is not found for API version v1beta");
   });
 
